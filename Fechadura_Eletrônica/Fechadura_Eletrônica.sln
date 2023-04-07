@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30320.27
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Fechadura_Eletrônica", "Fechadura_Eletrônica.vcxproj", "{75A5BE47-B0CB-4607-8285-D9D748F488FC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{75A5BE47-B0CB-4607-8285-D9D748F488FC}.Debug|x64.ActiveCfg = Debug|x64
+		{75A5BE47-B0CB-4607-8285-D9D748F488FC}.Debug|x64.Build.0 = Debug|x64
+		{75A5BE47-B0CB-4607-8285-D9D748F488FC}.Debug|x86.ActiveCfg = Debug|Win32
+		{75A5BE47-B0CB-4607-8285-D9D748F488FC}.Debug|x86.Build.0 = Debug|Win32
+		{75A5BE47-B0CB-4607-8285-D9D748F488FC}.Release|x64.ActiveCfg = Release|x64
+		{75A5BE47-B0CB-4607-8285-D9D748F488FC}.Release|x64.Build.0 = Release|x64
+		{75A5BE47-B0CB-4607-8285-D9D748F488FC}.Release|x86.ActiveCfg = Release|Win32
+		{75A5BE47-B0CB-4607-8285-D9D748F488FC}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0A1671A7-99C3-4747-A593-E78EE092439F}
+	EndGlobalSection
+EndGlobal
