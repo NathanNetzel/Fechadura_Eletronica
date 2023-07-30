@@ -58,14 +58,14 @@ void setup() {
   Serial.begin(9600);
   
   // Armazenar senha do ADM
-  dado[0].senhas[0] = '8';
-  dado[0].senhas[1] = '0';
-  dado[0].senhas[2] = '8';
-  dado[0].senhas[3] = '0';
-  dado[0].senhaADM[0] = '8';
-  dado[0].senhaADM[1] = '0';
-  dado[0].senhaADM[2] = '8';
-  dado[0].senhaADM[3] = '0';
+  dado[0].senhas[0] = '*';
+  dado[0].senhas[1] = '*';
+  dado[0].senhas[2] = '*';
+  dado[0].senhas[3] = '*';
+  dado[0].senhaADM[0] = '*';
+  dado[0].senhaADM[1] = '*';
+  dado[0].senhaADM[2] = '*';
+  dado[0].senhaADM[3] = '*';
   
   // Inciar lcd
   lcd.init();
