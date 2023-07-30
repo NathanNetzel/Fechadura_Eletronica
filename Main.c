@@ -8,31 +8,31 @@
 
 
 // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //
-                              // Definir Vari·veis
+                              // Definir Vari√°veis
 char tecla; // Tecla lida do teclado
-char digitada[10]; // Senha digitada pelo usu·rio para abrir a fechadrua //+1 para evitar problemas com char 
-int armazenadas = 1; // N˙mero de Senhas Armazenadas // 1 pois senhaADM vem por padr„o
-int contador = 0; // Conta o n˙mero vezes de tecla pressionada
+char digitada[10]; // Senha digitada pelo usu√°rio para abrir a fechadrua //+1 para evitar problemas com char 
+int armazenadas = 1; // N√∫mero de Senhas Armazenadas // 1 pois senhaADM vem por padr√£o
+int contador = 0; // Conta o n√∫mero vezes de tecla pressionada
 int i;
-bool encontrou, aberta, ADM; // Econtrou: senha consta na memÛria // Aberta: Estado da fechadura // ADM: Senha de ADM foi digitada corretamente
+bool encontrou, aberta, ADM; // Econtrou: senha consta na mem√≥ria // Aberta: Estado da fechadura // ADM: Senha de ADM foi digitada corretamente
 
 
 // Criar struct para armazenar as senhas cadastradas
-typedef struct
+typedef struct 
 {
-    char senhas[tamanhoSenha + 1];
-    char senhaADM[tamanhoSenha + 1];
-    int posicaoDel;
-
+  char senhas[tamanhoSenha+1];
+  char senhaADM[tamanhoSenha+1];
+  int posicaoDel;
+  
 }dados;
-
+  
 dados dado[10];
 
 // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //
-                                  //Par‚metros do teclado 
-
-const byte linhas = 4;
-const byte colunas = 4;
+                                  //Par√¢metros do teclado 
+                                  
+const byte linhas = 4; 
+const byte colunas = 4; 
 
 char teclas[linhas][colunas] = {
   {'1', '2', '3', 'A'},
@@ -41,510 +41,556 @@ char teclas[linhas][colunas] = {
   {'*', '0', '#', 'D'}
 };
 
-byte linhaPinos[linhas] = { 9, 8, 7, 6 };
-byte colunaPinos[colunas] = { 5, 4, 3, 2 };
+byte linhaPinos[linhas] = {9, 8, 7, 6}; 
+byte colunaPinos[colunas] = {5, 4, 3, 2}; 
 
 Keypad teclado = Keypad(makeKeymap(teclas), linhaPinos, colunaPinos, linhas, colunas);
 // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //
-
+// Definir pino bot√£o Rele
+#define rele 11
+//Declara√ß√£o pino do bot√£o
+#define pinoBotao 12
 // Definir o lcd
-LiquidCrystal_I2C lcd(0x3F, 16, 2);
+LiquidCrystal_I2C lcd(0x3F,16,2);
 
 void setup() {
 
-    Serial.begin(9600);
+  Serial.begin(9600);
+  
+  // Armazenar senha do ADM
+  dado[0].senhas[0] = '8';
+  dado[0].senhas[1] = '0';
+  dado[0].senhas[2] = '8';
+  dado[0].senhas[3] = '0';
+  dado[0].senhaADM[0] = '8';
+  dado[0].senhaADM[1] = '0';
+  dado[0].senhaADM[2] = '8';
+  dado[0].senhaADM[3] = '0';
+  
+  // Inciar lcd
+  lcd.init();
+  //lcd.backlight();
 
-    // Armazenar senha do ADM
-    dado[0].senhas[0] = '8';
-    dado[0].senhas[1] = '0';
-    dado[0].senhas[2] = '8';
-    dado[0].senhas[3] = '0';
-    dado[0].senhaADM[0] = '8';
-    dado[0].senhaADM[1] = '0';
-    dado[0].senhaADM[2] = '8';
-    dado[0].senhaADM[3] = '0';
-
-    // Inciar lcd
-    lcd.init();
-    //lcd.backlight();
+  // Definir pino de s√°ida para rele
+  pinMode (rele, OUTPUT);
 
 }
 
 void loop() {
+   
+   // Bot√£o foi pressionado(HIGH)
+  if(digitalRead(pinoBotao) == HIGH){ 
+    
+    if(aberta){
+      
+      digitalWrite(rele, HIGH); // Fechar fechadura 
+      lcd.backlight();
+      lcd.clear();
+      lcd.home(); // posiciona o texto do lcd no ponto incial
+      lcd.print("Fechadura");
+      lcd.setCursor(5,1);
+      lcd.print("Fechada");
+      Serial.print("\nFechadura fechada");
 
-    // Scanear teclado
-    tecla = teclado.getKey();
-
-    // Digitou algo 
-    if (tecla != NO_KEY) {
-
-        // Fechar fechadura // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //
-        if (contador == 0 and tecla == 'C' and aberta == true) {
-
-            lcd.backlight();
-            lcd.clear();
-            lcd.home(); // posiciona o texto do lcd no ponto incial
-            lcd.print("Fechadura");
-            lcd.setCursor(5, 1);
-            lcd.print("Fechada");
-            Serial.print("\nFechadura fechada");
-
-            delay(3000); // Espera 3 segundos e apaga o lcd
-            lcd.noBacklight();
-            aberta = false;
-            // ADD COMANDO FECHAR FECHADURA
-        }
-
-        // Acessar Menu Administrador  // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //
-        else if (contador == 0 and tecla == 'A') {
-
-            lcd.backlight();
-            lcd.clear();
-            lcd.home(); // posiciona o texto do lcd no ponto incial
-            lcd.print("Senha ADM");
-            Serial.print("\nDigite a senha de Administrador");
-            ADM = verificarADM();
-
-            if (ADM == true) {
-
-                armazenadas = menuADM(armazenadas); // FunÁ„o modifica o n˙mero de senhas armazenadas 
-
-                delay(3000); // Espera 3 segundos e apaga o lcd
-                lcd.noBacklight();
-                Serial.print("Senhas armazenadas: ");
-                Serial.print(armazenadas);
-                contador = 0;
-            }
-            else {
-                Serial.print("\nSenha de Administrador incorreta");
-            }
-        }
-
-        // Terminou de digitar a senha // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //
-        else if (tecla == '#' or tecla == '*') {
-
-            encontrou = false; // Restaura vari·vel encontrou
-
-            // Senha digitada tem o tamanho certo, pode ser correta // Caso contador != tamanhoSenha a senha digitada ja È dada como incorreta
-            if (contador == tamanhoSenha) {
-
-                // Verifica se a senha digitada existe
-                Serial.print("\nVerificando senha");
-                encontrou = verificar(digitada);
-
-                // Senha encontrada
-                if (encontrou) {
-
-                    // COMANDO ABRIR
-                    aberta = true;
-                    contador = 0;
-
-                    lcd.clear();
-                    lcd.home(); // Posiciona o texto do lcd no ponto incial
-                    lcd.print("Fechadura");
-                    lcd.setCursor(5, 1);
-                    lcd.print("Aberta");
-
-                    delay(3000); // Espera 3 segundos e apaga o lcd
-                    lcd.noBacklight();
-
-                    Serial.print("Fechadura Aberta");
-                }
-            }
-
-            // Senha inv·lida
-            if (encontrou == false) {
-
-                contador = 0;
-                lcd.clear();
-                lcd.home(); // Posiciona o texto do lcd no ponto incial
-                lcd.print("Senha");
-                lcd.setCursor(5, 1);
-                lcd.print("Invalida");
-                Serial.print("Senha inv·lida");
-
-                delay(2000); // Espera 3 segundos e apaga o lcd
-                lcd.noBacklight();
-            }
-        }
-
-        // Receber senha // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // 
-        else {
-
-            if (contador == 0) {
-                digitada[contador] = tecla;
-                lcd.backlight();
-                lcd.clear();
-                lcd.home(); // posiciona o texto do lcd no ponto incial
-                lcd.print("Digite Senha");
-                lcd.setCursor(5, 1);
-                lcd.print("*");
-
-            }
-            else {
-                digitada[contador] = tecla;
-                lcd.print("*");
-            }
-
-            Serial.print("\nTecla: ");
-            Serial.print(tecla);
-            contador = contador + 1;
-            Serial.print("\nContador: ");
-            Serial.print(contador);
-        }
+      delay(3000); // Espera 3 segundos e apaga o lcd
+      lcd.noBacklight();
+      aberta = false;
     }
+    
+    else{ // aberta == false
+      
+       digitalWrite(rele, LOW); // Abrir fechadura
+       aberta = true;
+
+       lcd.backlight();
+       lcd.clear();
+       lcd.home(); // Posiciona o texto do lcd no ponto incial
+       lcd.print("Fechadura");
+       lcd.setCursor(5,1);
+       lcd.print("Aberta");
+          
+       delay(3000); // Espera 3 segundos e apaga o lcd
+       lcd.noBacklight();
+          
+       Serial.print("Fechadura Aberta");  
+    }
+  }
+
+
+  // Scanear teclado
+  tecla = teclado.getKey();
+
+  // Digitou algo 
+  if(tecla != NO_KEY){
+
+      // Fechar fechadura // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //
+     if ( contador == 0 and tecla == 'C' and aberta == true){
+
+      digitalWrite(rele, HIGH); // Fechar fechadura
+      lcd.backlight();
+      lcd.clear();
+      lcd.home(); // posiciona o texto do lcd no ponto incial
+      lcd.print("Fechadura");
+      lcd.setCursor(5,1);
+      lcd.print("Fechada");
+      Serial.print("\nFechadura fechada");
+
+      delay(3000); // Espera 3 segundos e apaga o lcd
+      lcd.noBacklight();
+      aberta = false;
+     
+     }
+      
+     // Acessar Menu Administrador  // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //
+     else if(contador == 0 and tecla == 'A'){
+
+        lcd.backlight();
+        lcd.clear();
+        lcd.home(); // posiciona o texto do lcd no ponto incial
+        lcd.print("Senha ADM");
+        Serial.print("\nDigite a senha de Administrador");
+        ADM = verificarADM();
+        
+        if(ADM == true){
+          
+          armazenadas = menuADM(armazenadas); // Fun√ß√£o modifica o n√∫mero de senhas armazenadas 
+
+          delay(3000); // Espera 3 segundos e apaga o lcd
+          lcd.noBacklight();
+          Serial.print("Senhas armazenadas: ");
+          Serial.print(armazenadas); 
+          contador = 0;
+        }
+        else{
+          Serial.print("\nSenha de Administrador incorreta");
+        }
+     }
+     
+     // Terminou de digitar a senha // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //
+     else if( tecla == '#' or tecla =='*'){
+
+      encontrou = false; // Restaura vari√°vel encontrou
+      
+      // Senha digitada tem o tamanho certo, pode ser correta // Caso contador != tamanhoSenha a senha digitada ja √© dada como incorreta
+      if(contador == tamanhoSenha){
+      
+        // Verifica se a senha digitada existe
+        Serial.print("\nVerificando senha");
+        encontrou = verificar(digitada);
+       
+        // Senha encontrada
+        if (encontrou){
+
+          digitalWrite(rele, LOW); // Abrir fechadura
+          aberta = true;
+          contador = 0;
+
+          lcd.clear();
+          lcd.home(); // Posiciona o texto do lcd no ponto incial
+          lcd.print("Fechadura");
+          lcd.setCursor(5,1);
+          lcd.print("Aberta");
+          
+          delay(3000); // Espera 3 segundos e apaga o lcd
+          lcd.noBacklight();
+          
+          Serial.print("Fechadura Aberta");  
+        }  
+      }
+
+      // Senha inv√°lida
+      if( encontrou == false){ 
+        
+        contador = 0;
+        lcd.clear();
+        lcd.home(); // Posiciona o texto do lcd no ponto incial
+        lcd.print("Senha");
+        lcd.setCursor(5,1);
+        lcd.print("Invalida");
+        Serial.print("Senha inv√°lida");
+
+        delay(2000); // Espera 3 segundos e apaga o lcd
+        lcd.noBacklight();
+      }   
+     }
+
+    // Receber senha // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // 
+    else{ 
+
+        if(contador == 0){
+          digitada[contador] = tecla;
+          lcd.backlight();
+          lcd.clear();
+          lcd.home(); // posiciona o texto do lcd no ponto incial
+          lcd.print("Digite Senha");
+          lcd.setCursor(5,1);
+          lcd.print("*");
+          
+        }
+        else{
+          digitada[contador] = tecla;
+          lcd.print("*");
+        }
+        
+        Serial.print("\nTecla: ");
+        Serial.print(tecla);
+        contador = contador + 1;
+        Serial.print("\nContador: ");
+        Serial.print(contador);
+     }
+  }
 }
 
-int menuADM(int armazenadas) {
+int menuADM(int armazenadas){
 
-    // Mensagem do menu
+  // Mensagem do menu
+  lcd.clear();
+  lcd.home(); // Posiciona o texto do lcd no ponto incial
+  lcd.print("AddDelEdtResRet");
+  lcd.setCursor(0,1);
+  lcd.print("(1)(3)(7)(9)(0)");
+  Serial.print("\nMenu ADM");
+  //lcd.setCursor(0,1);
+  Serial.print("\nAdd(1) Del(3) Edt(7) Res(9) Voltar(0)");
+  tecla = teclado.getKey();
+  Serial.print("\nTecla: ");
+  Serial.print(tecla);
+
+  // Entradas inv√°lidas
+  while(tecla != '1' and tecla != '3' and tecla != '7' and tecla != '9' and tecla != '0'){
+
+    //Serial.print("\nTecla inv√°lida");
+    tecla = teclado.getKey();
+  }
+
+  if(tecla == '0'){
+
+    lcd.noBacklight();
+    return armazenadas;
+  }
+  
+
+  // Adicionar senha // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //
+  else if( tecla == '1'){
+
     lcd.clear();
     lcd.home(); // Posiciona o texto do lcd no ponto incial
-    lcd.print("AddDelEdtResRet");
-    lcd.setCursor(0, 1);
-    lcd.print("(1)(3)(7)(9)(0)");
-    Serial.print("\nMenu ADM");
-    //lcd.setCursor(0,1);
-    Serial.print("\nAdd(1) Del(3) Edt(7) Res(9) Voltar(0)");
+    lcd.print("Nova senha");
+    lcd.setCursor(5,1); // Posiciona na linha 1 para aparecer a senha digitada
+    Serial.print("\nNova senha\n");
+
+    i = 0;
     tecla = teclado.getKey();
-    Serial.print("\nTecla: ");
-    Serial.print(tecla);
+    while(i < tamanhoSenha){
+       tecla = teclado.getKey();
+       
+      // Digitou algo
+      if(tecla != NO_KEY){
 
-    // Entradas inv·lidas
-    while (tecla != '1' and tecla != '3' and tecla != '7' and tecla != '9' and tecla != '0') {
-
-        //Serial.print("\nTecla inv·lida");
-        tecla = teclado.getKey();
+        if(dado[0].posicaoDel == 0){
+          
+          dado[armazenadas+1].senhas[i] = tecla;
+        }
+        else{
+          
+          dado[dado[0].posicaoDel].senhas[i] = tecla;        
+        }
+        i = i + 1;
+        // Print do caracter *
+        lcd.print("*");
+        Serial.print("*");
+      } 
     }
-
-    if (tecla == '0') {
-
-        lcd.noBacklight();
-        return armazenadas;
-    }
-
-
-    // Adicionar senha // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //
-    else if (tecla == '1') {
+    if(dado[0].posicaoDel != 0){
 
         lcd.clear();
         lcd.home(); // Posiciona o texto do lcd no ponto incial
-        lcd.print("Nova senha");
-        lcd.setCursor(5, 1); // Posiciona na linha 1 para aparecer a senha digitada
-        Serial.print("\nNova senha\n");
+        lcd.print("Senha");
+        lcd.setCursor(4,1);
+        lcd.print("adicionada");
+        Serial.print("\nSenha adicionada com sucesso");
+        
+        Serial.print(dado[dado[0].posicaoDel].senhas);
+        dado[0].posicaoDel = 0; // Caso tenha salvado senha em uma posi√ß√£o deletada, remove essa posi√ß√£o da mem√≥ria
+        return armazenadas;
+      
+    }
+    else{
 
+        lcd.clear();
+        lcd.home(); // Posiciona o texto do lcd no ponto incial
+        lcd.print("Senha");
+        lcd.setCursor(4,1);
+        lcd.print("adicionada");
+      
+        Serial.print("\nSenha adicionada com sucesso");
+        Serial.print(dado[armazenadas+1].senhas);
+
+        return armazenadas + 1;
+    }   
+  }
+
+  // Excluir senha // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //
+  else if(tecla == '3'){
+    
+     lcd.clear();
+     lcd.home(); // Posiciona o texto do lcd no ponto incial
+     lcd.print("Digite senha");
+     lcd.setCursor(0,1);
+     lcd.print("del");
+     Serial.print("\nDigite senha del\n");
+     lcd.setCursor(5,1); // Posiciona na linha 1 para aparecer a senha digitada
+
+     // Recebe senha a ser deletada
+     i = 0;
+     while(i < tamanhoSenha){
+       tecla = teclado.getKey();
+       
+       // Digitou algo
+       if(tecla != NO_KEY){
+        
+          digitada[i] = tecla;
+          lcd.print(tecla);
+          i = i + 1;
+       }
+     }
+     
+     // Verifica se a senha a ser deletada existe
+     Serial.print("\nVerificando senha");
+     encontrou = verificar(digitada);
+         
+     // Senha encontrada
+     if (encontrou == true and posicao(digitada) != 0){
+
+      contador = posicao(digitada);
+      dado[0].posicaoDel = contador;
+      // Senha armazenada na posi√ß√£o da apagada passa a ser igual a adm
+      for(i = 0; i < tamanhoSenha; i++){
+        dado[contador].senhas[i] = dado[0].senhaADM[i]; 
+      }
+      lcd.clear();
+      lcd.home(); // Posiciona o texto do lcd no ponto incial
+      lcd.print("Senha apagada");
+
+      delay(3000); // Espera 3 segundos e apaga o lcd
+      lcd.noBacklight();
+      Serial.print("\nSenha apagada");  
+     }
+
+    // Senha n√£o encontrada
+    else{
+      lcd.clear();
+      lcd.home(); // Posiciona o texto do lcd no ponto incial
+      lcd.print("Senha nao");
+      lcd.setCursor(4,1);
+      lcd.print("encontrada");
+      Serial.print("\nSenha n√£o encontrada");
+    }
+    return armazenadas;
+  }
+
+
+  // Editar Senha // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //
+  else if( tecla == '7'){
+
+     lcd.clear();
+     lcd.home(); // Posiciona o texto do lcd no ponto incial
+     lcd.print("Digite senha");
+     lcd.setCursor(0,1);
+     lcd.print("edt");
+     Serial.print("\nDigite senha editar\n");
+     lcd.setCursor(5,1); // Posiciona na linha 1 para aparecer a senha digitada
+
+     // Recebe senha a ser editada
+     i = 0;
+     while(i < tamanhoSenha){
+       tecla = teclado.getKey();
+       
+       // Digitou algo
+       if(tecla != NO_KEY){
+        
+          digitada[i] = tecla;
+          lcd.print(tecla);
+          i = i + 1;
+       }
+     }
+     // Verifica se a senha a ser editada existe
+     Serial.print("\nVerificando senha");
+     encontrou = verificar(digitada);
+         
+     // Senha encontrada
+     if (encontrou == true and posicao(digitada) != 0){
+
+        lcd.clear();
+        lcd.home(); // Posiciona o texto do lcd no ponto incial
+        lcd.print("Nova senha:");
+        Serial.print("\nSenha anterior: "); 
+        Serial.print(dado[contador].senhas);
+        lcd.setCursor(5,1); // Lcd posicionado no inicio da segunda linha
+        Serial.print("\nNova senha: ");
+         
+        contador = posicao(digitada);
+        // Recebe a nova senha editada
         i = 0;
-        tecla = teclado.getKey();
-        while (i < tamanhoSenha) {
+        while(i < tamanhoSenha){
             tecla = teclado.getKey();
-
+            
             // Digitou algo
-            if (tecla != NO_KEY) {
+            if(tecla != NO_KEY){
 
-                if (dado[0].posicaoDel == 0) {
-
-                    dado[armazenadas + 1].senhas[i] = tecla;
-                }
-                else {
-
-                    dado[dado[0].posicaoDel].senhas[i] = tecla;
-                }
-                i = i + 1;
-                // Print do caracter *
                 lcd.print("*");
                 Serial.print("*");
-            }
-        }
-        if (dado[0].posicaoDel != 0) {
-
-            lcd.clear();
-            lcd.home(); // Posiciona o texto do lcd no ponto incial
-            lcd.print("Senha");
-            lcd.setCursor(4, 1);
-            lcd.print("adicionada");
-            Serial.print("\nSenha adicionada com sucesso");
-
-            Serial.print(dado[dado[0].posicaoDel].senhas);
-            dado[0].posicaoDel = 0; // Caso tenha salvado senha em uma posiÁ„o deletada, remove essa posiÁ„o da memÛria
-            return armazenadas;
-
-        }
-        else {
-
-            lcd.clear();
-            lcd.home(); // Posiciona o texto do lcd no ponto incial
-            lcd.print("Senha");
-            lcd.setCursor(4, 1);
-            lcd.print("adicionada");
-
-            Serial.print("\nSenha adicionada com sucesso");
-            Serial.print(dado[armazenadas + 1].senhas);
-
-            return armazenadas + 1;
-        }
-    }
-
-    // Excluir senha // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //
-    else if (tecla == '3') {
-
-        lcd.clear();
-        lcd.home(); // Posiciona o texto do lcd no ponto incial
-        lcd.print("Digite senha");
-        lcd.setCursor(0, 1);
-        lcd.print("del");
-        Serial.print("\nDigite senha del\n");
-        lcd.setCursor(5, 1); // Posiciona na linha 1 para aparecer a senha digitada
-
-        // Recebe senha a ser deletada
-        i = 0;
-        while (i < tamanhoSenha) {
-            tecla = teclado.getKey();
-
-            // Digitou algo
-            if (tecla != NO_KEY) {
-
-                digitada[i] = tecla;
-                lcd.print(tecla);
+                dado[contador].senhas[i] = tecla;
+        
                 i = i + 1;
             }
         }
-
-        // Verifica se a senha a ser deletada existe
-        Serial.print("\nVerificando senha");
-        encontrou = verificar(digitada);
-
-        // Senha encontrada
-        if (encontrou == true and posicao(digitada) != 0) {
-
-            contador = posicao(digitada);
-            dado[0].posicaoDel = contador;
-            // Senha armazenada na posiÁ„o da apagada passa a ser igual a adm
-            for (i = 0; i < tamanhoSenha; i++) {
-                dado[contador].senhas[i] = dado[0].senhaADM[i];
-            }
-            lcd.clear();
-            lcd.home(); // Posiciona o texto do lcd no ponto incial
-            lcd.print("Senha apagada");
-
-            delay(3000); // Espera 3 segundos e apaga o lcd
-            lcd.noBacklight();
-            Serial.print("\nSenha apagada");
-        }
-
-        // Senha n„o encontrada
-        else {
-            lcd.clear();
-            lcd.home(); // Posiciona o texto do lcd no ponto incial
-            lcd.print("Senha nao");
-            lcd.setCursor(4, 1);
-            lcd.print("encontrada");
-            Serial.print("\nSenha n„o encontrada");
-        }
-        return armazenadas;
+      lcd.clear();
+      lcd.home(); // Posiciona o texto do lcd no ponto incial
+      lcd.print("Senha");
+      lcd.setCursor(2,1);
+      lcd.print("alterada");
     }
 
+    // Senha n√£o encontrada
+    else{
+      lcd.clear();
+      lcd.home(); // Posiciona o texto do lcd no ponto incial
+      lcd.print("Senha nao");
+      lcd.setCursor(4,1);
+      lcd.print("encontrada");
 
-    // Editar Senha // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //
-    else if (tecla == '7') {
+      
+      Serial.print("\nSenha n√£o encontrada");
+    }
+    return armazenadas;
+  }
+
+  // Resetar fechadura // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //
+  else if( tecla == '9'){
+
+    lcd.clear();
+    lcd.home(); // Posiciona o texto do lcd no ponto incial
+    lcd.print("Resetar");
+    lcd.setCursor(0,1);
+    lcd.print("Sim(A) Sair(0)");
+    Serial.print("\nResetar fechadura");
+    Serial.print("Digite A para avan√ßar ou 0 para sair");
+
+    // Entradas inv√°lidas
+    while(tecla != 'A' and tecla != '0'){
+
+        //Serial.print("\nTecla inv√°lida");
+        tecla = teclado.getKey();
+    }
+
+    if ( tecla == '0'){
+
+      lcd.noBacklight();
+      return armazenadas;
+    }
+    else if (tecla == 'A'){
 
         lcd.clear();
-        lcd.home(); // Posiciona o texto do lcd no ponto incial
-        lcd.print("Digite senha");
-        lcd.setCursor(0, 1);
-        lcd.print("edt");
-        Serial.print("\nDigite senha editar\n");
-        lcd.setCursor(5, 1); // Posiciona na linha 1 para aparecer a senha digitada
+        lcd.home(); // posiciona o texto do lcd no ponto incial
+        lcd.print("Senha ADM");
+        Serial.print("\nDigite a senha de Administrador");
+        ADM = verificarADM();
+        
+        if(ADM == true){
 
-        // Recebe senha a ser editada
-        i = 0;
-        while (i < tamanhoSenha) {
-            tecla = teclado.getKey();
+          contador = 1; // Come√ßar por dado[1] e manter a senha de adm
+          while(contador <= armazenadas){
 
-            // Digitou algo
-            if (tecla != NO_KEY) {
-
-                digitada[i] = tecla;
-                lcd.print(tecla);
-                i = i + 1;
+            for(i = 0; i < tamanhoSenha; i++){
+              dado[contador].senhas[i] = dado[0].senhaADM[i]; 
             }
+            lcd.print("*");
+            contador = contador + 1;
+          }
+
+          lcd.clear();
+          lcd.home(); // posiciona o texto do lcd no ponto incial
+          lcd.print("Fechadura");
+          lcd.setCursor(2,1);
+          lcd.print("Resetada");
+          Serial.print("\nFechadura fechada");
+          Serial.print("\nFechaduraResetada");
+          armazenadas = 1;
+          return armazenadas;
         }
-        // Verifica se a senha a ser editada existe
-        Serial.print("\nVerificando senha");
-        encontrou = verificar(digitada);
-
-        // Senha encontrada
-        if (encontrou == true and posicao(digitada) != 0) {
-
-            lcd.clear();
-            lcd.home(); // Posiciona o texto do lcd no ponto incial
-            lcd.print("Nova senha:");
-            Serial.print("\nSenha anterior: ");
-            Serial.print(dado[contador].senhas);
-            lcd.setCursor(5, 1); // Lcd posicionado no inicio da segunda linha
-            Serial.print("\nNova senha: ");
-
-            contador = posicao(digitada);
-            // Recebe a nova senha editada
-            i = 0;
-            while (i < tamanhoSenha) {
-                tecla = teclado.getKey();
-
-                // Digitou algo
-                if (tecla != NO_KEY) {
-
-                    lcd.print("*");
-                    Serial.print("*");
-                    dado[contador].senhas[i] = tecla;
-
-                    i = i + 1;
-                }
-            }
-            lcd.clear();
-            lcd.home(); // Posiciona o texto do lcd no ponto incial
-            lcd.print("Senha");
-            lcd.setCursor(2, 1);
-            lcd.print("alterada");
-        }
-
-        // Senha n„o encontrada
-        else {
-            lcd.clear();
-            lcd.home(); // Posiciona o texto do lcd no ponto incial
-            lcd.print("Senha nao");
-            lcd.setCursor(4, 1);
-            lcd.print("encontrada");
-
-
-            Serial.print("\nSenha n„o encontrada");
-        }
-        return armazenadas;
-    }
-
-    // Resetar fechadura // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //
-    else if (tecla == '9') {
-
-        lcd.clear();
-        lcd.home(); // Posiciona o texto do lcd no ponto incial
-        lcd.print("Resetar");
-        lcd.setCursor(0, 1);
-        lcd.print("Sim(A) Sair(0)");
-        Serial.print("\nResetar fechadura");
-        Serial.print("Digite A para avanÁar ou 0 para sair");
-
-        // Entradas inv·lidas
-        while (tecla != 'A' and tecla != '0') {
-
-            //Serial.print("\nTecla inv·lida");
-            tecla = teclado.getKey();
-        }
-
-        if (tecla == '0') {
-
-            lcd.noBacklight();
-            return armazenadas;
-        }
-        else if (tecla == 'A') {
-
-            lcd.clear();
-            lcd.home(); // posiciona o texto do lcd no ponto incial
-            lcd.print("Senha ADM");
-            Serial.print("\nDigite a senha de Administrador");
-            ADM = verificarADM();
-
-            if (ADM == true) {
-
-                contador = 1; // ComeÁar por dado[1] e manter a senha de adm
-                while (contador <= armazenadas) {
-
-                    for (i = 0; i < tamanhoSenha; i++) {
-                        dado[contador].senhas[i] = dado[0].senhaADM[i];
-                    }
-                    lcd.print("*");
-                    contador = contador + 1;
-                }
-
-                lcd.clear();
-                lcd.home(); // posiciona o texto do lcd no ponto incial
-                lcd.print("Fechadura");
-                lcd.setCursor(2, 1);
-                lcd.print("Resetada");
-                Serial.print("\nFechadura fechada");
-                Serial.print("\nFechaduraResetada");
-                armazenadas = 1;
-                return armazenadas;
-            }
-            else {
-                lcd.clear();
-                lcd.home(); // posiciona o texto do lcd no ponto incial
-                lcd.print("Senha ADM");
-                lcd.setCursor(2, 1);
-                lcd.print("Incorreta");
-                Serial.print("\nSenha de Administrador incorreta");
-            }
-        }
-    }
+        else{
+          lcd.clear();
+          lcd.home(); // posiciona o texto do lcd no ponto incial
+          lcd.print("Senha ADM");
+          lcd.setCursor(2,1);
+          lcd.print("Incorreta");
+          Serial.print("\nSenha de Administrador incorreta");
+        }  
+   }
+  }   
 }
 
 // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //// ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //
-                                                                          // FUN«’ES
+                                                                          // FUN√á√ïES
 
-                                // Indica se est· armazenado na struct
-bool verificar(char entrada[tamanhoSenha + 1]) {
+                                // Indica se est√° armazenado na struct
+bool verificar(char entrada[tamanhoSenha+1]){
 
     encontrou = false;
-    contador = -1; // Iniciar an·lise pelo dado[0]
-    while (contador <= armazenadas and encontrou == false) {
-
+    contador = -1; // Iniciar an√°lise pelo dado[0]
+    while(contador <= armazenadas and encontrou == false){
+      
         i = 0;
-        contador = contador + 1; // PrÛxima posiÁ„o do struct
-
-        // Verificar se a senha est· armazenada    
-        while (entrada[i] == dado[contador].senhas[i] and i < tamanhoSenha - 1) { // i sÛ vai atÈ tamanhosenha-1 pois s„o os valores que importam no char, caso tenha escrito mais que isso, senha j· È inv·lida
+        contador = contador + 1; // Pr√≥xima posi√ß√£o do struct
+       
+        // Verificar se a senha est√° armazenada    
+        while(entrada[i] == dado[contador].senhas[i] and i < tamanhoSenha-1){ // i s√≥ vai at√© tamanhosenha-1 pois s√£o os valores que importam no char, caso tenha escrito mais que isso, senha j√° √© inv√°lida
 
             i = i + 1;
 
-            if (entrada[i] == dado[contador].senhas[i] and i == tamanhoSenha - 1) {
-
+            if (entrada[i] == dado[contador].senhas[i] and i == tamanhoSenha-1){ 
+              
                 encontrou = true;
             }
         }
     }
-    return encontrou;
+    return encontrou;  
 }
 
 // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //
                                 // Recebe e verifica senha do ADM
-bool verificarADM() {
+bool verificarADM(){
 
-    lcd.setCursor(5, 1);
+    lcd.setCursor(5,1); 
     ADM = false; // Para verificar a senha
     i = 0;
     tecla = teclado.getKey();
-    while (i < tamanhoSenha) {
-        tecla = teclado.getKey();
-
-        // Digitou algo
-        if (tecla != NO_KEY) {
-
-            digitada[i] = tecla;
-
-            i = i + 1;
-
-            // Print do caracter *
-
-            lcd.print("*");
-            Serial.print("*");
-        }
+    while(i < tamanhoSenha){
+       tecla = teclado.getKey();
+       
+      // Digitou algo
+      if(tecla != NO_KEY){
+        
+        digitada[i] = tecla;
+        
+        i = i + 1;
+        
+        // Print do caracter *
+       
+        lcd.print("*");
+        Serial.print("*");
+      } 
     }
 
-    // Verificar se a senha est· armazenada
-    i = 0;
-    while (digitada[i] == dado[0].senhaADM[i] and i < tamanhoSenha - 1) {
-
+    // Verificar se a senha est√° armazenada
+    i = 0;  
+    while(digitada[i] == dado[0].senhaADM[i] and i < tamanhoSenha-1){ 
+        
         i = i + 1;
 
-        if (digitada[i] == dado[0].senhaADM[i] and i == tamanhoSenha - 1) {
-
+        if (digitada[i] == dado[0].senhaADM[i] and i == tamanhoSenha-1){ 
+              
             ADM = true;
         }
     }
@@ -553,26 +599,26 @@ bool verificarADM() {
 }
 
 // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //
-                                // Inidica a posiÁ„o no struct 
-int posicao(char entrada[tamanhoSenha + 1]) {
+                                // Inidica a posi√ß√£o no struct 
+int posicao(char entrada[tamanhoSenha+1]){
 
     encontrou = false;
-    contador = -1;
-    while (contador <= armazenadas and encontrou == false) {
-
+    contador = -1; 
+    while(contador <= armazenadas and encontrou == false){
+      
         i = 0;
-        contador = contador + 1; // PrÛxima posiÁ„o do struct
-
-        // Verificar se a senha est· armazenada    
-        while (entrada[i] == dado[contador].senhas[i] and i < tamanhoSenha - 1) {
-
+        contador = contador + 1; // Pr√≥xima posi√ß√£o do struct
+       
+        // Verificar se a senha est√° armazenada    
+        while(entrada[i] == dado[contador].senhas[i] and i < tamanhoSenha-1 ){ 
+        
             i = i + 1;
 
-            if (entrada[i] == dado[contador].senhas[i] and i == tamanhoSenha - 1) {
-
+            if (entrada[i] == dado[contador].senhas[i] and i == tamanhoSenha-1){ 
+              
                 encontrou = true;
             }
         }
     }
-    return contador;
+    return contador;  
 }
