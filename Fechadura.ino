@@ -8,13 +8,13 @@
 
 
 // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //
-                              // Definir Vari·veis
+                              // Definir Vari√°veis
 char tecla; // Tecla lida do teclado
-char digitada[10]; // Senha digitada pelo usu·rio para abrir a fechadrua //+1 para evitar problemas com char 
-int armazenadas = 1; // N˙mero de Senhas Armazenadas // 1 pois senhaADM vem por padr„o
-int contador = 0; // Conta o n˙mero vezes de tecla pressionada
+char digitada[10]; // Senha digitada pelo usu√°rio para abrir a fechadrua //+1 para evitar problemas com char 
+int armazenadas = 1; // N√∫mero de Senhas Armazenadas // 1 pois senhaADM vem por padr√£o
+int contador = 0; // Conta o n√∫mero vezes de tecla pressionada
 int i;
-bool encontrou, aberta, ADM; // Econtrou: senha consta na memÛria // Aberta: Estado da fechadura // ADM: Senha de ADM foi digitada corretamente
+bool encontrou, aberta, ADM; // Econtrou: senha consta na mem√≥ria // Aberta: Estado da fechadura // ADM: Senha de ADM foi digitada corretamente
 
 
 // Criar struct para armazenar as senhas cadastradas
@@ -29,7 +29,7 @@ typedef struct
 dados dado[10];
 
 // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //
-                                  //Par‚metros do teclado 
+                                  //Par√¢metros do teclado 
                                   
 const byte linhas = 4; 
 const byte colunas = 4; 
@@ -55,14 +55,14 @@ void setup() {
   Serial.begin(9600);
   
   // Armazenar senha do ADM
-  dado[0].senhas[0] = '8';
-  dado[0].senhas[1] = '0';
-  dado[0].senhas[2] = '8';
-  dado[0].senhas[3] = '0';
-  dado[0].senhaADM[0] = '8';
-  dado[0].senhaADM[1] = '0';
-  dado[0].senhaADM[2] = '8';
-  dado[0].senhaADM[3] = '0';
+  dado[0].senhas[0] = '*';
+  dado[0].senhas[1] = '*';
+  dado[0].senhas[2] = '*';
+  dado[0].senhas[3] = '*';
+  dado[0].senhaADM[0] = '*';
+  dado[0].senhaADM[1] = '*';
+  dado[0].senhaADM[2] = '*';
+  dado[0].senhaADM[3] = '*';
   
   // Inciar lcd
   lcd.init();
@@ -107,7 +107,7 @@ void loop() {
         
         if(ADM == true){
           
-          armazenadas = menuADM(armazenadas); // FunÁ„o modifica o n˙mero de senhas armazenadas 
+          armazenadas = menuADM(armazenadas); // Fun√ß√£o modifica o n√∫mero de senhas armazenadas 
 
           delay(3000); // Espera 3 segundos e apaga o lcd
           lcd.noBacklight();
@@ -123,9 +123,9 @@ void loop() {
      // Terminou de digitar a senha // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //
      else if( tecla == '#' or tecla =='*'){
 
-      encontrou = false; // Restaura vari·vel encontrou
+      encontrou = false; // Restaura vari√°vel encontrou
       
-      // Senha digitada tem o tamanho certo, pode ser correta // Caso contador != tamanhoSenha a senha digitada ja È dada como incorreta
+      // Senha digitada tem o tamanho certo, pode ser correta // Caso contador != tamanhoSenha a senha digitada ja √© dada como incorreta
       if(contador == tamanhoSenha){
       
         // Verifica se a senha digitada existe
@@ -152,7 +152,7 @@ void loop() {
         }  
       }
 
-      // Senha inv·lida
+      // Senha inv√°lida
       if( encontrou == false){ 
         
         contador = 0;
@@ -161,7 +161,7 @@ void loop() {
         lcd.print("Senha");
         lcd.setCursor(5,1);
         lcd.print("Invalida");
-        Serial.print("Senha inv·lida");
+        Serial.print("Senha inv√°lida");
 
         delay(2000); // Espera 3 segundos e apaga o lcd
         lcd.noBacklight();
@@ -210,10 +210,10 @@ int menuADM(int armazenadas){
   Serial.print("\nTecla: ");
   Serial.print(tecla);
 
-  // Entradas inv·lidas
+  // Entradas inv√°lidas
   while(tecla != '1' and tecla != '3' and tecla != '7' and tecla != '9' and tecla != '0'){
 
-    //Serial.print("\nTecla inv·lida");
+    //Serial.print("\nTecla inv√°lida");
     tecla = teclado.getKey();
   }
 
@@ -265,7 +265,7 @@ int menuADM(int armazenadas){
         Serial.print("\nSenha adicionada com sucesso");
         
         Serial.print(dado[dado[0].posicaoDel].senhas);
-        dado[0].posicaoDel = 0; // Caso tenha salvado senha em uma posiÁ„o deletada, remove essa posiÁ„o da memÛria
+        dado[0].posicaoDel = 0; // Caso tenha salvado senha em uma posi√ß√£o deletada, remove essa posi√ß√£o da mem√≥ria
         return armazenadas;
       
     }
@@ -318,7 +318,7 @@ int menuADM(int armazenadas){
 
       contador = posicao(digitada);
       dado[0].posicaoDel = contador;
-      // Senha armazenada na posiÁ„o da apagada passa a ser igual a adm
+      // Senha armazenada na posi√ß√£o da apagada passa a ser igual a adm
       for(i = 0; i < tamanhoSenha; i++){
         dado[contador].senhas[i] = dado[0].senhaADM[i]; 
       }
@@ -331,14 +331,14 @@ int menuADM(int armazenadas){
       Serial.print("\nSenha apagada");  
      }
 
-    // Senha n„o encontrada
+    // Senha n√£o encontrada
     else{
       lcd.clear();
       lcd.home(); // Posiciona o texto do lcd no ponto incial
       lcd.print("Senha nao");
       lcd.setCursor(4,1);
       lcd.print("encontrada");
-      Serial.print("\nSenha n„o encontrada");
+      Serial.print("\nSenha n√£o encontrada");
     }
     return armazenadas;
   }
@@ -406,7 +406,7 @@ int menuADM(int armazenadas){
       lcd.print("alterada");
     }
 
-    // Senha n„o encontrada
+    // Senha n√£o encontrada
     else{
       lcd.clear();
       lcd.home(); // Posiciona o texto do lcd no ponto incial
@@ -415,7 +415,7 @@ int menuADM(int armazenadas){
       lcd.print("encontrada");
 
       
-      Serial.print("\nSenha n„o encontrada");
+      Serial.print("\nSenha n√£o encontrada");
     }
     return armazenadas;
   }
@@ -429,12 +429,12 @@ int menuADM(int armazenadas){
     lcd.setCursor(0,1);
     lcd.print("Sim(A) Sair(0)");
     Serial.print("\nResetar fechadura");
-    Serial.print("Digite A para avanÁar ou 0 para sair");
+    Serial.print("Digite A para avan√ßar ou 0 para sair");
 
-    // Entradas inv·lidas
+    // Entradas inv√°lidas
     while(tecla != 'A' and tecla != '0'){
 
-        //Serial.print("\nTecla inv·lida");
+        //Serial.print("\nTecla inv√°lida");
         tecla = teclado.getKey();
     }
 
@@ -453,7 +453,7 @@ int menuADM(int armazenadas){
         
         if(ADM == true){
 
-          contador = 1; // ComeÁar por dado[1] e manter a senha de adm
+          contador = 1; // Come√ßar por dado[1] e manter a senha de adm
           while(contador <= armazenadas){
 
             for(i = 0; i < tamanhoSenha; i++){
@@ -486,20 +486,20 @@ int menuADM(int armazenadas){
 }
 
 // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //// ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //
-                                                                          // FUN«’ES
+                                                                          // FUN√á√ïES
 
-                                // Indica se est· armazenado na struct
+                                // Indica se est√° armazenado na struct
 bool verificar(char entrada[tamanhoSenha+1]){
 
     encontrou = false;
-    contador = -1; // Iniciar an·lise pelo dado[0]
+    contador = -1; // Iniciar an√°lise pelo dado[0]
     while(contador <= armazenadas and encontrou == false){
       
         i = 0;
-        contador = contador + 1; // PrÛxima posiÁ„o do struct
+        contador = contador + 1; // Pr√≥xima posi√ß√£o do struct
        
-        // Verificar se a senha est· armazenada    
-        while(entrada[i] == dado[contador].senhas[i] and i < tamanhoSenha-1){ // i sÛ vai atÈ tamanhosenha-1 pois s„o os valores que importam no char, caso tenha escrito mais que isso, senha j· È inv·lida
+        // Verificar se a senha est√° armazenada    
+        while(entrada[i] == dado[contador].senhas[i] and i < tamanhoSenha-1){ // i s√≥ vai at√© tamanhosenha-1 pois s√£o os valores que importam no char, caso tenha escrito mais que isso, senha j√° √© inv√°lida
 
             i = i + 1;
 
@@ -537,7 +537,7 @@ bool verificarADM(){
       } 
     }
 
-    // Verificar se a senha est· armazenada
+    // Verificar se a senha est√° armazenada
     i = 0;  
     while(digitada[i] == dado[0].senhaADM[i] and i < tamanhoSenha-1){ 
         
@@ -553,7 +553,7 @@ bool verificarADM(){
 }
 
 // ---------- // ---------- // ---------- // ---------- // ---------- // ---------- //
-                                // Inidica a posiÁ„o no struct 
+                                // Inidica a posi√ß√£o no struct 
 int posicao(char entrada[tamanhoSenha+1]){
 
     encontrou = false;
@@ -561,9 +561,9 @@ int posicao(char entrada[tamanhoSenha+1]){
     while(contador <= armazenadas and encontrou == false){
       
         i = 0;
-        contador = contador + 1; // PrÛxima posiÁ„o do struct
+        contador = contador + 1; // Pr√≥xima posi√ß√£o do struct
        
-        // Verificar se a senha est· armazenada    
+        // Verificar se a senha est√° armazenada    
         while(entrada[i] == dado[contador].senhas[i] and i < tamanhoSenha-1 ){ 
         
             i = i + 1;
